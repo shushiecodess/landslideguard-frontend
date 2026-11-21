@@ -1,0 +1,158 @@
+import React from 'react'
+import {
+  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
+} from 'recharts'
+import { useApi } from '../hooks/useApi'
+import { PageState } from '../components/States'
+import StatCard from '../components/StatCard'
+import RiskBadge from '../components/RiskBadge'
+import { riskMeta } from '../utils/risk'
+import { TrendingUp, CalendarDays, Linkedin, Mountain } from 'lucide-react'
+
+const TOOLTIP_STYLE = { background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }
+const TOOLTIP_ITEM_STYLE = { color: 'var(--popover-foreground)' }
+const AXIS_STYLE = { stroke: 'var(--muted-foreground)', fontSize: 11 }
+const GRID_STYLE = { stroke: 'var(--border)' }
+
+export default function Analytics() {
+  const an = useApi('/api/analytics')
+
+  const riskDist = (an.data?.risk_distribution || []).map((d) => ({
+    ...d,
+    name: d.level,
+    fill: riskMeta(d.level).color,
+  }))
+  const monthly = an.data?.monthly_trends || []
+  const states = an.data?.states || []
+  const highRisk = an.data?.high_risk_locations || []
+  const incidentsByState = an.data?.incidents_by_state || []
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-extrabold text-foreground">Historical Analytics</h1>
+        <p className="text-sm text-muted-foreground">Trends and insights from historical landslide data (2018–2026, DEMO)</p>
+      </div>
+
+      <PageState loading={an.loading} error={an.error} onRetry={an.reload}>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard title="Rainfall–Landslide Correlation" value={an.data?.rainfall_correlation ?? 0} icon={Linkedin} sub="Pearson coefficient (demo data)" />
+          <StatCard title="Total Incidents (History)" value={incidentsByState.reduce((s, i) => s + i.incidents, 0)} icon={Mountain} sub="Across historical dataset" />
+          <StatCard title="Monthly Trend Window" value={monthly.length} icon={CalendarDays} sub="1 year of monthly aggregation" />
+          <StatCard title="High Risk Locations" value={highRisk.filter((l) => ['HIGH', 'CRITICAL'].includes(l.risk_level)).length} icon={TrendingUp} sub="Currently monitored" color="#ef4444" />
+        </div>
+
+        {/* Monthly trends + rainfall */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="card">
+            <h3 className="mb-4 font-bold">Monthly Landslide Incidents</h3>
+            <div
+              role="img"
+              aria-label={`Bar chart of monthly landslide incidents across ${monthly.length} months`}
+            >
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={monthly}>
+                <CartesianGrid strokeDasharray="3 3" {...GRID_STYLE} />
+                <XAxis dataKey="month" {...AXIS_STYLE} />
+                <YAxis {...AXIS_STYLE} />
+                <Tooltip
+                  contentStyle={TOOLTIP_STYLE}
+                  itemStyle={TOOLTIP_ITEM_STYLE}
+                  cursor={{ fill: 'var(--muted)', stroke: 'none' }}
+                />
+                <Bar dataKey="incidents" name="Incidents" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="card">
+            <h3 className="mb-4 font-bold">Avg Rainfall vs Incidents</h3>
+            <div
+              role="img"
+              aria-label={`Line chart comparing average rainfall and landslide incidents across ${monthly.length} months`}
+            >
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart data={monthly}>
+                <CartesianGrid strokeDasharray="3 3" {...GRID_STYLE} />
+                <XAxis dataKey="month" {...AXIS_STYLE} />
+                <YAxis {...AXIS_STYLE} />
+                <Tooltip
+                  contentStyle={TOOLTIP_STYLE}
+                  itemStyle={TOOLTIP_ITEM_STYLE}
+                  cursor={{ stroke: 'var(--border)' }}
+                />
+                <Legend />
+                <Line type="monotone" dataKey="avg_rainfall" name="Avg rainfall (mm)" stroke="var(--chart-2)" strokeDasharray="5 3" strokeWidth={2} dot={{ r: 2 }} />
+                <Line type="monotone" dataKey="incidents" name="Incidents" stroke="var(--chart-1)" strokeWidth={2} dot={{ r: 2 }} />
+              </LineChart>
+            </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Distribution + State risk */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="card">
+            <h3 className="mb-4 font-bold">Current Risk Distribution</h3>
+            <div
+              role="img"
+              aria-label={`Pie chart of monitored locations by risk level: ${
+                riskDist.map((d) => `${d.level} ${d.count}`).join(', ') || 'no data'
+              }`}
+            >
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={riskDist} dataKey="count" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={3} label>
+                  {riskDist.map((d) => <Cell key={d.level} fill={d.fill} />)}
+                </Pie>
+                <Tooltip contentStyle={TOOLTIP_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="card">
+            <h3 className="mb-4 font-bold">State-wise Risk Summary</h3>
+            <div className="space-y-2.5">
+              {states.map((s) => (
+                <div key={s.state} className="flex items-center justify-between">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">{s.state}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {s.locations} locations · peak {s.highest_risk_location || '—'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-bold" style={{ color: riskMeta(s.risk_level).color }}>
+                      {s.avg_risk_score}
+                    </span>
+                    <RiskBadge level={s.risk_level} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* High risk list */}
+        <div className="card">
+          <h3 className="mb-4 font-bold">Highest Risk Locations</h3>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {highRisk.map((l) => (
+              <div key={`${l.name}-${l.state}`} className="rounded-lg border border-border bg-muted p-4">
+                <div className="flex items-center justify-between">
+                  <p className="font-bold text-foreground">{l.name}</p>
+                  <RiskBadge level={l.risk_level} score={l.risk_score} />
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{l.state} · {l.district}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </PageState>
+    </div>
+  )
+}

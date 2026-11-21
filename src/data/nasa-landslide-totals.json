@@ -1,0 +1,45 @@
+{
+  "annualReports": [
+    {
+      "year": "2007",
+      "reports": 73
+    },
+    {
+      "year": "2008",
+      "reports": 57
+    },
+    {
+      "year": "2009",
+      "reports": 52
+    },
+    {
+      "year": "2010",
+      "reports": 244
+    },
+    {
+      "year": "2011",
+      "reports": 156
+    },
+    {
+      "year": "2012",
+      "reports": 79
+    },
+    {
+      "year": "2013",
+      "reports": 204
+    },
+    {
+      "year": "2014",
+      "reports": 83
+    },
+    {
+      "year": "2015",
+      "reports": 216
+    },
+    {
+      "year": "2016",
+      "reports": 101
+    }
+  ],
+  "northeastMappedReports": 315
+}

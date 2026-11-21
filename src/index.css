@@ -1,0 +1,284 @@
+@import "tailwindcss" source(none);
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@config "../tailwind.config.js";
+@source "../app";
+@source "./";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background font-sans text-foreground;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--input);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+  :root {
+    color-scheme: dark;
+    --background: #000000;
+    --foreground: #F7F7F8;
+    --card: #1C1E21;
+    --primary: #D1FE17;
+    --card-foreground: var(--foreground);
+    --popover: var(--card);
+    --popover-foreground: var(--foreground);
+    --primary-foreground: var(--background);
+    --secondary: var(--card);
+    --secondary-foreground: var(--foreground);
+    --muted: color-mix(in srgb, var(--card), var(--foreground) 7%);
+    --muted-foreground: color-mix(in srgb, var(--foreground) 72%, var(--card));
+    --accent: color-mix(in srgb, var(--card), var(--primary) 12%);
+    --accent-foreground: var(--primary);
+    --destructive: #f29494;
+    --border: color-mix(in srgb, var(--card), var(--foreground) 14%);
+    --input: color-mix(in srgb, var(--card), var(--foreground) 36%);
+    --ring: var(--primary);
+    --chart-1: var(--primary);
+    --chart-2: var(--foreground);
+    --radius: 0.625rem;
+    --sidebar: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-border bg-card p-5;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    @apply bg-primary/85;
+  }
+
+  .btn-primary:disabled,
+  .btn-outline:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground transition-colors;
+  }
+
+  .btn-outline:hover:not(:disabled, [aria-pressed="true"]) {
+    @apply border-primary/50 bg-accent text-accent-foreground;
+  }
+
+  .btn-outline[aria-pressed="true"] {
+    @apply border-primary bg-primary text-primary-foreground;
+  }
+
+  .btn-outline[aria-pressed="true"]:hover:not(:disabled) {
+    @apply bg-primary/85;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-input bg-card px-4 py-2.5 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-ring;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground;
+  }
+
+  .dashboard-workspace :is(.card, .input, .btn-outline, .btn-primary) {
+    @apply rounded-lg;
+  }
+}
+
+/* Leaflet map overrides */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: var(--background);
+  font-family: inherit;
+  border-radius: 1rem;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
+.leaflet-popup-content-wrapper {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.leaflet-container .leaflet-bar a,
+.leaflet-container .leaflet-popup-close-button {
+  background: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+.leaflet-container .leaflet-bar a:hover,
+.leaflet-container .leaflet-popup-close-button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.leaflet-container .leaflet-bar a.leaflet-disabled {
+  background: var(--card);
+  color: var(--muted-foreground);
+}
+
+.leaflet-container .leaflet-control-attribution {
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-size: 10px;
+}
+
+.leaflet-container .leaflet-control-attribution a {
+  color: var(--foreground);
+}
+
+/* Selection */
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.india-risk-map.leaflet-container {
+  height: clamp(365px, 65vh, 680px);
+  border-radius: 0;
+  background-color: #141e25;
+}
+
+.dark-world-tiles {
+  filter: invert(0.93) hue-rotate(180deg) saturate(0.66) brightness(0.87);
+}
+
+.india-risk-region:hover {
+  fill-opacity: 0.25;
+  stroke-width: 2.5;
+}
+
+.india-map-tooltip.leaflet-tooltip {
+  color: var(--foreground);
+  background: var(--card);
+  border-color: var(--border);
+}
+
+.india-incident-tooltip.leaflet-tooltip {
+  max-width: min(18rem, 65vw);
+  white-space: normal;
+}
+
+.archive-pin {
+  display: grid;
+  place-items: center;
+}
+
+.archive-pin span {
+  display: block;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--foreground);
+  border-radius: 50%;
+  background: var(--background);
+  box-shadow: 0 0 0 3px #000a;
+}
+
+.archive-pin--exact span {
+  background: var(--foreground);
+}
+
+.archive-pin--advisory span {
+  width: 15px;
+  height: 15px;
+  border-color: #fb923c;
+  background: #fb923c;
+  box-shadow: 0 0 0 5px #fb923c45;
+}
+
+.dashboard-risk-bar {
+  transform-origin: left;
+  animation: dashboard-risk-reveal 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: width 0.35s ease-out;
+}
+
+@keyframes dashboard-risk-reveal {
+  from { transform: scaleX(0); }
+}

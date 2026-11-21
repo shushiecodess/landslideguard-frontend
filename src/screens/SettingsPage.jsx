@@ -1,0 +1,108 @@
+import React, { useEffect, useState } from 'react'
+import { Settings as SettingsIcon, Server, Database, Cloud, Shield, ShieldCheck, Info } from 'lucide-react'
+import api from '../services/api'
+import { PageState } from '../components/States'
+import { useAuth } from '../hooks/useAuth'
+
+export default function SettingsPage() {
+  const { isAdmin } = useAuth()
+  const [health, setHealth] = useState(null)
+  const [settings, setSettings] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const load = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [h, s] = await Promise.all([api.get('/api/health'), api.get('/api/admin/settings')])
+      setHealth(h.data)
+      setSettings(s.data)
+    } catch (e) {
+      setError(e?.response?.data?.detail || e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    // Only the admin view calls the admin-only endpoint; a viewer must never
+    // trigger a guaranteed 403.
+    if (isAdmin) load()
+  }, [isAdmin])
+
+  // The backend enforces admin on every /api/admin route; this guard keeps a
+  // signed-in viewer from watching the page fail with a raw 403. Role comes
+  // from the shared auth state and is treated as non-admin until proven admin,
+  // so a missing user/role falls through to this denied state.
+  if (!isAdmin) {
+    return (
+      <div className="card flex flex-col items-center gap-3 py-16 text-center">
+        <ShieldCheck className="h-10 w-10 text-muted-foreground" />
+        <p className="font-bold text-foreground">Admin access required</p>
+        <p className="text-sm text-muted-foreground">
+          Please sign in with an admin account to view system settings.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div>
+        <h1 className="text-2xl font-extrabold text-foreground">System Settings</h1>
+        <p className="text-sm text-muted-foreground">Configuration and health status of the platform</p>
+      </div>
+
+      <PageState loading={loading} error={error} onRetry={load}>
+        <div className="card">
+          <h3 className="mb-4 flex items-center gap-2 font-bold"><Server className="h-5 w-5 text-primary" /> Application Status</h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[
+              ['Application', health?.app],
+              ['Version', health?.version],
+              ['API Status', health?.status],
+              ['Database', health?.database],
+            ].map(([k, v]) => (
+              <div key={k} className="flex items-center justify-between rounded-lg bg-muted px-3 py-2.5">
+                <span className="text-sm text-muted-foreground">{k}</span>
+                <span className="font-semibold text-foreground">{v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="mb-4 flex items-center gap-2 font-bold"><Database className="h-5 w-5 text-primary" /> Data & Model</h3>
+          <div className="space-y-3">
+            {[
+              { icon: Cloud, label: 'Data Mode', value: settings?.data_mode },
+              { icon: Database, label: 'Database', value: settings?.database || 'SQLite (backend/landslideguard.db)' },
+              { icon: Info, label: 'Model Path', value: settings?.model_path },
+              { icon: Shield, label: 'Weather API Key', value: settings?.weather_api_configured ? 'Configured (LIVE mode available)' : 'Not set (DEMO weather)' },
+            ].map(({ icon: Icon, label, value }) => (
+              <div key={label} className="flex items-center justify-between rounded-lg bg-muted px-3 py-2.5">
+                <span className="flex items-center gap-2 text-sm text-foreground"><Icon className="h-4 w-4 text-muted-foreground" /> {label}</span>
+                <span className="text-xs font-semibold text-foreground">{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="mb-3 flex items-center gap-2 font-bold"><SettingsIcon className="h-5 w-5 text-emerald-400" /> Environment Variables</h3>
+          <p className="text-sm text-muted-foreground">
+            Configure via <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-primary">.env</code> at the project root.
+            See <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-primary">.env.example</code> for the full list.
+          </p>
+          <div className="mt-3 space-y-1.5 rounded-lg bg-muted p-3 font-mono text-xs text-muted-foreground">
+            <p>DATABASE_URL=sqlite:///backend/landslideguard.db</p>
+            <p>DATA_MODE=DEMO</p>
+            <p>OPENWEATHER_API_KEY= (optional, enables LIVE)</p>
+            <p>JWT_SECRET=&lt;generate a unique value&gt;</p>
+          </div>
+        </div>
+      </PageState>
+    </div>
+  )
+}

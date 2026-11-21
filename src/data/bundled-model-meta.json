@@ -1,0 +1,97 @@
+{
+  "model_version": "1.1.0",
+  "trained_at_utc": "2026-10-05T17:49:07+00:00",
+  "model_type": "RandomForestClassifier",
+  "library_versions": {
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "joblib": "1.6.0",
+    "python": "3.14.7"
+  },
+  "hyperparameters": {
+    "n_estimators": 200,
+    "max_depth": null,
+    "min_samples_leaf": 2,
+    "class_weight": "balanced",
+    "random_state": 42,
+    "train_test_split": {
+      "test_size": 0.2,
+      "random_state": 42,
+      "stratify": true
+    }
+  },
+  "trained_on": "DEMO/sample dataset (not production data)",
+  "dataset": "data/historical_landslide_data.csv",
+  "dataset_sha256": "b8c4bad4547663d8d57f6f3bda9bed8068dcd694ed505fce105908757fcc3788",
+  "n_samples": 1470,
+  "n_samples_train": 1176,
+  "n_samples_test": 294,
+  "class_balance": {
+    "positive": 990,
+    "negative": 480
+  },
+  "n_features": 12,
+  "accuracy": 0.8231292517006803,
+  "precision": 0.8842105263157894,
+  "recall": 0.8484848484848485,
+  "f1_score": 0.865979381443299,
+  "confusion_matrix": [
+    [
+      74,
+      22
+    ],
+    [
+      30,
+      168
+    ]
+  ],
+  "feature_importance": {
+    "soil_moisture": 0.17967186095995588,
+    "rainfall": 0.1698674192354809,
+    "rainfall_intensity": 0.1340491995795727,
+    "slope": 0.1288270809815713,
+    "elevation": 0.10142579322015757,
+    "humidity": 0.09923712446222369,
+    "temperature": 0.05133025867594358,
+    "distance_to_drain": 0.04256614136431262,
+    "historical_occurrence": 0.03996307371934214,
+    "soil_type_enc": 0.018595857013805523,
+    "land_cover_enc": 0.018582952291725623,
+    "rock_type_enc": 0.015883238495908582
+  },
+  "feature_columns": [
+    "rainfall",
+    "rainfall_intensity",
+    "soil_moisture",
+    "temperature",
+    "humidity",
+    "elevation",
+    "slope",
+    "historical_occurrence",
+    "distance_to_drain",
+    "land_cover_enc",
+    "soil_type_enc",
+    "rock_type_enc"
+  ],
+  "calibration": {
+    "min_prob": 0.0,
+    "max_prob": 1.0
+  },
+  "risk_thresholds": {
+    "score_range": [
+      0,
+      100
+    ],
+    "upper_bounds": {
+      "LOW": 30.0,
+      "MODERATE": 60.0,
+      "HIGH": 80.0,
+      "CRITICAL": 100.0
+    }
+  },
+  "label_leakage": {
+    "present_in_demo_data": true,
+    "note": "Label is derived from a thresholded linear score over rainfall, rainfall_intensity, soil_moisture, slope, elevation, historical_occurrence and distance_to_drain, plus uniform noise. Temperature and humidity do not enter the score directly. Reported metrics measure recovery of a synthetic rule, not real-world landslide prediction accuracy."
+  }
+}
