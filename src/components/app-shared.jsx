@@ -1,4 +1,4 @@
-import { Bell, BrainCircuit, ChartNoAxesCombined, LayoutGrid, Map, MapPin, Settings, ShieldCheck, Sparkles, Volume2 } from 'lucide-react'
+import { Bell, BrainCircuit, ChartNoAxesCombined, LayoutGrid, Map, MapPin, Radio, Settings, ShieldCheck, Sparkles, Volume2 } from 'lucide-react'
 
 export const navGroups = [
   {
@@ -8,6 +8,7 @@ export const navGroups = [
       { path: '/dashboard', title: 'Dashboard', icon: LayoutGrid },
       { path: '/alerts', title: 'Alerts', icon: Bell },
       { path: '/voice-alerts', title: 'Voice Alerts', icon: Volume2 },
+      { path: '/voice-alerts/send', title: 'Send Voice Alert', icon: Radio, adminOnly: true },
     ],
   },
   {

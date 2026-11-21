@@ -35,15 +35,19 @@ describe('App routing', () => {
     )
   })
 
-  it('opens the voice listener for a signed-out phone', async () => {
+  it.each(['visitor', 'viewer', 'admin'])('shows playback only to a %s on the public voice page', async (role) => {
+    if (role !== 'visitor') localStorage.setItem('lg_user', JSON.stringify({ role, email: 'listener@example.test' }))
     renderAt('/voice-alerts')
     await waitFor(() => expect(screen.getByRole('button', { name: 'Enable sound' })).toBeEnabled())
     expect(screen.getByRole('heading', { name: 'Voice Alerts' })).toBeInTheDocument()
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Broadcast language')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Send demo voice alert' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Copy phone link' })).not.toBeInTheDocument()
   })
 
-  it('redirects an unauthenticated visitor from a protected route to login', async () => {
-    renderAt('/dashboard')
+  it.each(['/dashboard', '/voice-alerts/send'])('redirects a signed-out visitor from %s to login', async (path) => {
+    renderAt(path)
     expect(
       await screen.findByText(/Sign in to the monitoring platform/i),
     ).toBeInTheDocument()

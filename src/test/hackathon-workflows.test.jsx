@@ -6,6 +6,7 @@ import api from '../services/api'
 import RiskMapPage from '../screens/RiskMapPage'
 import Prediction from '../screens/Prediction'
 import VoiceAlerts from '../screens/VoiceAlerts'
+import SendVoiceAlert from '../screens/SendVoiceAlert'
 import { navGroups } from '../components/app-shared'
 
 const app = vi.hoisted(() => ({
@@ -170,12 +171,19 @@ describe('hackathon workflows', () => {
     expect(start).toHaveBeenCalledOnce()
   })
 
+  it('withholds broadcast controls from a non-admin at the sender page', () => {
+    open(<SendVoiceAlert />, '/voice-alerts/send')
+    expect(screen.getByRole('status')).toHaveTextContent('Administrator access is required')
+    expect(screen.queryByRole('button', { name: 'Send demo voice alert' })).not.toBeInTheDocument()
+  })
+
   it('sends the selected recording from one administrator button', async () => {
     app.isAdmin = true
     api.post.mockResolvedValue({ data: { ...voice, language: 'hi' } })
-    open(<VoiceAlerts />, '/voice-alerts')
+    open(<SendVoiceAlert />, '/voice-alerts/send')
     fireEvent.change(screen.getByLabelText('Broadcast language'), { target: { value: 'hi' } })
     fireEvent.click(screen.getByRole('button', { name: 'Send demo voice alert' }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/voice-alerts', { language: 'hi' }))
+    expect(await screen.findByRole('status')).toHaveTextContent('Voice alert sent.')
   })
 })

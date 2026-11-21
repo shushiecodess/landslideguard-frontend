@@ -1,17 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Check, Link as LinkIcon, Radio, Volume2 } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
+import { Check, Volume2 } from 'lucide-react'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
 import { usePolling } from '../hooks/useApi'
 import { formatTs } from '../utils/risk'
-import api from '../services/api'
-
-const RECORDINGS = [
-  { code: 'en', label: 'English' },
-  { code: 'hi', label: 'हिन्दी' },
-  { code: 'as', label: 'অসমীয়া' },
-  { code: 'bn', label: 'বাংলা' },
-]
+import { RECORDINGS } from '../data/voice-alert-recordings'
 
 function useAlertAudio(alert, file) {
   const context = useRef(null)
@@ -88,48 +80,19 @@ function useAlertAudio(alert, file) {
 }
 
 export default function VoiceAlerts() {
-  const { isAdmin } = useAuth()
   const { isOnline } = useOnlineStatus()
   const feed = usePolling('/api/voice-alerts/latest', 1500)
   const alert = feed.data?.alert
   const recording = RECORDINGS.find(({ code }) => code === alert?.language)
   const file = recording ? `/assets/voice-alerts/${recording.code}.mp3` : ''
   const sound = useAlertAudio(alert, file)
-  const [language, setLanguage] = useState('en')
-  const [sending, setSending] = useState(false)
-  const [error, setError] = useState('')
-  const [copied, setCopied] = useState(false)
-
-  async function sendAlert() {
-    setSending(true)
-    setError('')
-    try {
-      await api.post('/api/voice-alerts', { language })
-      await feed.reload()
-    } catch (failure) {
-      setError(typeof failure.response?.data?.detail === 'string'
-        ? failure.response.data.detail : 'The voice alert could not be sent.')
-    } finally {
-      setSending(false)
-    }
-  }
-
-  async function copyLink() {
-    setError('')
-    try {
-      await navigator.clipboard.writeText(new URL('/voice-alerts', window.location.origin).href)
-      setCopied(true)
-    } catch {
-      setError('Copy the page address from your browser to open it on another device.')
-    }
-  }
+  useEffect(() => {
+    document.title = 'Voice Alerts · LandslideGuard AI'
+  }, [])
 
   return (
-    <div className="mx-auto w-full max-w-lg space-y-4">
+    <main className="mx-auto min-h-svh w-full max-w-lg space-y-4 px-4 py-8 sm:py-12">
       <header className="space-y-2 py-4">
-        <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
-          <Radio size={15} aria-hidden="true" /> Demo broadcasts
-        </span>
         <h1 className="text-3xl font-bold tracking-tight">Voice Alerts</h1>
         <p className="text-sm text-muted-foreground">Tap to enable sound, then keep this page open to hear the next alert.</p>
       </header>
@@ -148,25 +111,6 @@ export default function VoiceAlerts() {
         {sound.error && <p className="text-sm text-amber-300" role="status">{sound.error}</p>}
         {(feed.error || !isOnline) && <p className="text-sm text-destructive" role="status">{feed.error || 'Offline. Reconnect to receive new broadcasts.'}</p>}
       </section>
-
-      {isAdmin && (
-        <section className="card space-y-3">
-          <h2 className="font-semibold">Broadcast the NH-702 demo</h2>
-          <label htmlFor="alert-language" className="label">Broadcast language</label>
-          <select id="alert-language" className="input" value={language} onChange={(event) => setLanguage(event.target.value)}>
-            {RECORDINGS.map(({ code, label }) => <option key={code} value={code}>{label}</option>)}
-          </select>
-          <button onClick={sendAlert} className="btn-primary w-full" disabled={sending || !isOnline}>
-            <Radio size={17} aria-hidden="true" /> {sending ? 'Sending…' : 'Send demo voice alert'}
-          </button>
-        </section>
-      )}
-
-      <button onClick={copyLink} className="btn-outline w-full">
-        {copied ? <Check size={16} aria-hidden="true" /> : <LinkIcon size={16} aria-hidden="true" />}
-        {copied ? 'Phone link copied' : 'Copy phone link'}
-      </button>
-      {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
-    </div>
+    </main>
   )
 }

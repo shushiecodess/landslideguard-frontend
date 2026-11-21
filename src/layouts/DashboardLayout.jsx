@@ -10,20 +10,17 @@ export default function DashboardLayout() {
   const { isOnline } = useOnlineStatus()
   const navigate = useNavigate()
   const { pathname, search } = useLocation()
-  const publicListener = pathname === '/voice-alerts'
   const page = navLinks.find(({ path }) => path === pathname)
 
   useEffect(() => {
-    if (!isAuthed && !publicListener) navigate('/login', { replace: true, state: { returnPath: pathname, returnSearch: search } })
-  }, [isAuthed, navigate, pathname, search, publicListener])
+    if (!isAuthed) navigate('/login', { replace: true, state: { returnPath: pathname, returnSearch: search } })
+  }, [isAuthed, navigate, pathname, search])
 
   useEffect(() => {
     document.title = `${page?.title || 'Workspace'} · LandslideGuard AI`
   }, [page])
 
-  if (!isAuthed) {
-    return publicListener ? <main className="min-h-svh px-4 py-8"><Outlet /></main> : null
-  }
+  if (!isAuthed) return null
 
   const handleLogout = () => {
     logout()

@@ -8,6 +8,7 @@ import RiskMapPage from './screens/RiskMapPage'
 import Prediction from './screens/Prediction'
 import Alerts from './screens/Alerts'
 import VoiceAlerts from './screens/VoiceAlerts'
+import SendVoiceAlert from './screens/SendVoiceAlert'
 import Analytics from './screens/Analytics'
 import Locations from './screens/Locations'
 import AIInsights from './screens/AIInsights'
@@ -19,12 +20,13 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/voice-alerts" element={<VoiceAlerts />} />
       <Route element={<DashboardLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/map" element={<RiskMapPage />} />
         <Route path="/prediction" element={<Prediction />} />
         <Route path="/alerts" element={<Alerts />} />
-        <Route path="/voice-alerts" element={<VoiceAlerts />} />
+        <Route path="/voice-alerts/send" element={<SendVoiceAlert />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/locations" element={<Locations />} />
         <Route path="/ai-insights" element={<AIInsights />} />
